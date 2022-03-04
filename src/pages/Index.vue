@@ -8,9 +8,12 @@
 
 <script>
 import compass from '../config/compass'
+import frequencies from '../config/frequencies'
+import Audio from '../audio-controller/audioController'
+import Bus from '../event-bus/bus'
+
 import Octave from '../components/Octave.vue'
 
-import Audio from '../audio-controller/audioController'
 export default {
     name: 'Index',
     components: {
@@ -35,116 +38,117 @@ export default {
                 y: 'G4#',
                 u: 'A4#',
             },
-            frequencies: {
-                C4: 261,
-                'C4#': 277,
-                D4: 293,
-                'D4#': 311,
-                E4: 329,
-                F4: 349,
-                'F4#': 369,
-                G4: 391,
-                'G4#': 415,
-                A4: 440,
-                'A4#': 466,
-                B4: 493,
-            },
             gainNode: null,
             ctx: null,
-            keysStatus: [
+            notesStatus: [
                 {
-                    key: 'a',
+                    note: 'a',
                     pressState: false,
                 },
                 {
-                    key: 's',
+                    note: 's',
                     pressState: false,
                 },
                 {
-                    key: 'd',
+                    note: 'd',
                     pressState: false,
                 },
                 {
-                    key: 'f',
+                    note: 'f',
                     pressState: false,
                 },
                 {
-                    key: 'g',
+                    note: 'g',
                     pressState: false,
                 },
                 {
-                    key: 'h',
+                    note: 'h',
                     pressState: false,
                 },
                 {
-                    key: 'j',
+                    note: 'j',
                     pressState: false,
                 },
                 {
-                    key: 'w',
+                    note: 'w',
                     pressState: false,
                 },
                 {
-                    key: 'e',
+                    note: 'e',
                     pressState: false,
                 },
                 {
-                    key: 't',
+                    note: 't',
                     pressState: false,
                 },
                 {
-                    key: 'y',
+                    note: 'y',
                     pressState: false,
                 },
                 {
-                    key: 'u',
+                    note: 'u',
                     pressState: false,
                 },
             ],
         }
     },
     mounted() {
-        document.addEventListener('keydown', ({ key }) => {
-            if (['a', 's', 'd', 'f', 'g', 'h', 'j', 'w', 'e', 't', 'y', 'u'].includes(key)) {
-                this.onKeydown(key)
+        Bus.$on('mousedown', (pitchName) => {
+            this.onMousedown(pitchName)
+        })
+
+        Bus.$on('mouseup', () => {
+            this.onMouseup()
+        })
+
+        document.addEventListener('notedown', ({ note }) => {
+            if (['a', 's', 'd', 'f', 'g', 'h', 'j', 'w', 'e', 't', 'y', 'u'].includes(note)) {
+                this.onNotedown(note)
             }
         })
 
-        document.addEventListener('keyup', ({ key }) => {
-            if (['a', 's', 'd', 'f', 'g', 'h', 'j', 'w', 'e', 't', 'y', 'u'].includes(key)) {
-                this.onKeyup(key)
+        document.addEventListener('noteup', ({ note }) => {
+            if (['a', 's', 'd', 'f', 'g', 'h', 'j', 'w', 'e', 't', 'y', 'u'].includes(note)) {
+                this.onNoteup(note)
             }
         })
 
         this.audio = new Audio()
     },
     methods: {
-        setKeyStatus(key, pressState) {
-            let k = this.keysStatus.filter((item) => {
-                return item.key === key
+        setNoteStatus(note, pressState) {
+            let k = this.notesStatus.filter((item) => {
+                return item.note === note
             })[0]
-            
+
             k.pressState = pressState
         },
-        onKeydown(key) {
-            let k = this.keysStatus.filter((item) => {
-                return item.key === key
+        onNotedown(note) {
+            let k = this.notesStatus.filter((item) => {
+                return item.note === note
             })[0]
 
             if (k.pressState) {
                 return
             } else {
-                this.setKeyStatus(key, true)
+                this.setNoteStatus(note, true)
             }
 
-            let pitchName = this.pitchNameMapper[key]
-            let frequency = this.frequencies[pitchName]
+            let pitchName = this.pitchNameMapper[note]
+            let frequency = frequencies[pitchName]
 
             this.audio.start(frequency)
             log(pitchName, frequency)
         },
-        onKeyup(key) {
-            this.setKeyStatus(key, false)
+        onMousedown(pitchName) {
+            let frequency = frequencies[pitchName[0]]
+            this.audio.start(frequency)
+        },
+        onMouseup() {
+            this.audio.stop()
+        },
+        onNoteup(note) {
+            this.setNoteStatus(note, false)
             this.audio.stop()
         },
     },

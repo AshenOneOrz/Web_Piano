@@ -13,34 +13,39 @@ const Audio = class {
 
     start(frequency) {
         this.setup()
-
+        log(frequency)
         this._osci.frequency.value = frequency
         
         let value = 1.3
         let endTime = 0.13
-        this.setValueAtTimeRamp(value, endTime)
+        this.setValueAtTimeExponential(value, endTime)
 
         setTimeout(() => {
             let v = 1
             let e = 0
-            this.setValueAtTimeRamp(v, e)
+            this.setValueAtTimeExponential(v, e)
         }, endTime * 1000);
         
         this._osci.start()
     }
 
     stop() {
-        let v = 0.01
+        let v = 0
         let e = 0.8
-        this.setValueAtTimeRamp(v, e)
+        this.setValueAtTimeLinear(v, e)
     }
 
-    setValueAtTimeRamp(value, endTime) {
+    setValueAtTimeExponential(value, endTime) {
         this._gainNode.gain.exponentialRampToValueAtTime(value, this._ctx.currentTime + endTime)
     }
 
+    setValueAtTimeLinear(value, endTime) {
+        this._gainNode.gain.linearRampToValueAtTime(value, this._ctx.currentTime + endTime)
+    }
+
+
     mute() {
-        this._gainNode.gain.setValueAtTime(0, 0)
+        this._gainNode.gain.setValueAtTimeLinear(0, 0)
     }
 }
 

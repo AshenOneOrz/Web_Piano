@@ -4,19 +4,19 @@
         <!-- 钢琴有 7 个八度， 每个八度有 12 个键位 -->
         <!-- 白键有 CDEFGAB 7 个键 -->
         <!-- 黑键有 #C #D #F #G #A 5个键 -->
-        <template v-for="(key) in data.octave">
-            <Key :data="key" :index='data.rangeIndex' />
+        <template v-for="(note) in data.octave">
+            <Note :data="note" :index='data.rangeIndex' />
         </template>
     </div>
 </template>
 
 <script>
-import Key from './Key.vue'
+import Note from './Note.vue'
 
 export default {
     name: 'Octave',
     components: {
-        Key,
+        Note,
     },
     props: {
         data: {
