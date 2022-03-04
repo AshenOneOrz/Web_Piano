@@ -1,5 +1,8 @@
 <template>
-    <div :class="`key ${data.type} ${Array.isArray(data.pitchName) ? data.pitchName.join(' ') : data.pitchName}`"></div>
+    <div
+        :class="className"
+        :id="id"
+    ></div>
 </template>
 
 <script>
@@ -10,6 +13,23 @@ export default {
             type: Object,
             default: () => {},
         },
+        index: {
+            type: Number,
+            default: 0,
+        },
+    },
+    computed: {
+        className() {
+            let data = this.data
+            let pitchName = Array.isArray(data.pitchName) ? data.pitchName.join(' ') : data.pitchName
+            return `key ${data.type} ${pitchName}`
+        },
+        id() {
+            let data = this.data
+            let index = this.index
+            let pitchName = Array.isArray(data.pitchName) ? data.pitchName[1] + index : data.pitchName + index
+            return `id-key-${pitchName}`
+        }
     },
     data() {
         return {}

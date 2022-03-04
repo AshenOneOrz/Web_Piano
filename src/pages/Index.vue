@@ -9,6 +9,8 @@
 <script>
 import compass from '../config/compass'
 import Octave from '../components/Octave.vue'
+
+import Audio from '../audio-controller/audioController'
 export default {
     name: 'Index',
     components: {
@@ -16,6 +18,7 @@ export default {
     },
     data() {
         return {
+            aduio: null,
             compass,
             pitchNameMapper: {
                 a: 'C4',
@@ -32,7 +35,7 @@ export default {
                 y: 'G4#',
                 u: 'A4#',
             },
-            frequencyMapper: {
+            frequencies: {
                 C4: 261,
                 'C4#': 277,
                 D4: 293,
@@ -51,51 +54,51 @@ export default {
             keysStatus: [
                 {
                     key: 'a',
-                    status: false,
+                    pressState: false,
                 },
                 {
                     key: 's',
-                    status: false,
+                    pressState: false,
                 },
                 {
                     key: 'd',
-                    status: false,
+                    pressState: false,
                 },
                 {
                     key: 'f',
-                    status: false,
+                    pressState: false,
                 },
                 {
                     key: 'g',
-                    status: false,
+                    pressState: false,
                 },
                 {
                     key: 'h',
-                    status: false,
+                    pressState: false,
                 },
                 {
                     key: 'j',
-                    status: false,
+                    pressState: false,
                 },
                 {
                     key: 'w',
-                    status: false,
+                    pressState: false,
                 },
                 {
                     key: 'e',
-                    status: false,
+                    pressState: false,
                 },
                 {
                     key: 't',
-                    status: false,
+                    pressState: false,
                 },
                 {
                     key: 'y',
-                    status: false,
+                    pressState: false,
                 },
                 {
                     key: 'u',
-                    status: false,
+                    pressState: false,
                 },
             ],
         }
@@ -112,51 +115,37 @@ export default {
                 this.onKeyup(key)
             }
         })
+
+        this.audio = new Audio()
     },
     methods: {
-        setKeyStatus(key, status) {
+        setKeyStatus(key, pressState) {
             let k = this.keysStatus.filter((item) => {
                 return item.key === key
             })[0]
-            k.status = status
+            
+            k.pressState = pressState
         },
         onKeydown(key) {
             let k = this.keysStatus.filter((item) => {
                 return item.key === key
             })[0]
 
-            if (k.status) {
+            if (k.pressState) {
                 return
             } else {
                 this.setKeyStatus(key, true)
             }
-            let pitchName = this.pitchNameMapper[key]
-            let ctx = new AudioContext()
-            this.ctx = ctx
-            let gainNode = ctx.createGain()
-            this.gainNode = gainNode
-            let osci = ctx.createOscillator()
-            gainNode.value = 0
-            // 在 0.1 秒内让声音达到 1.3 a
-            this.gainNode.gain.exponentialRampToValueAtTime(1.3, this.ctx.currentTime + 0.13)
-            // 这之后让声音保持在 1
-            setTimeout(() => {
-                this.gainNode.gain.exponentialRampToValueAtTime(1, 0)
-            }, 130)
-            osci.connect(gainNode)
-            gainNode.connect(ctx.destination)
-            let frequency = this.frequencyMapper[pitchName]
-            osci.frequency.value = frequency
-            log(pitchName, frequency)
 
-            osci.start()
+            let pitchName = this.pitchNameMapper[key]
+            let frequency = this.frequencies[pitchName]
+
+            this.audio.start(frequency)
+            log(pitchName, frequency)
         },
         onKeyup(key) {
             this.setKeyStatus(key, false)
-            this.gainNode.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 1)
-            setTimeout(() => {
-                this.gainNode.gain.setValueAtTime(0, 0)
-            }, 1000)
+            this.audio.stop()
         },
     },
 }
@@ -165,41 +154,5 @@ export default {
 <style lang="less" scoped>
 .page {
     display: flex;
-}
-.octave {
-    display: flex;
-    position: relative;
-    .key {
-        width: 30px;
-        height: 150px;
-        border: 1px solid #000;
-        border-left: 1px solid rgb(104, 104, 104);
-        border-right: 1px solid rgb(150, 150, 150);
-    }
-    .white {
-        background-image: linear-gradient(130deg, #fff, rgb(241, 241, 241));
-    }
-    .black {
-        position: absolute;
-        background-image: linear-gradient(130deg, #000, rgb(65, 63, 63));
-        width: 20px;
-        height: 110px;
-        box-shadow: 2px 1px 4px rgb(85, 84, 84);
-    }
-    .sharp-C {
-        left: 20px;
-    }
-    .sharp-D {
-        left: (20px + 30px);
-    }
-    .sharp-F {
-        left: (30px * 3 + 20px);
-    }
-    .sharp-G {
-        left: (30px * 4 + 20px);
-    }
-    .sharp-A {
-        left: (30px * 5 + 20px);
-    }
 }
 </style>

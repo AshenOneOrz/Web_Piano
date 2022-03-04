@@ -5,7 +5,7 @@
         <!-- 白键有 CDEFGAB 7 个键 -->
         <!-- 黑键有 #C #D #F #G #A 5个键 -->
         <template v-for="(key) in data.octave">
-            <Key :data="key" />
+            <Key :data="key" :index='data.rangeIndex' />
         </template>
     </div>
 </template>
